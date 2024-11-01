@@ -1,0 +1,7 @@
+.vs/
+_*/
+example/
+bin/
+lib/
+temp/
+main/build
