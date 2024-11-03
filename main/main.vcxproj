@@ -19,7 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main\main.c" />
+    <ClCompile Include="main\http_client.cpp" />
+    <ClCompile Include="main\main.cpp" />
+    <ClCompile Include="main\recorder.c" />
+    <ClCompile Include="main\recorder.cpp" />
+    <ClCompile Include="main\wav.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -28,11 +32,12 @@
   <ItemGroup>
     <None Include="main\idf_component.yml" />
     <None Include="main\Kconfig.projbuild" />
-    <None Include="main\postman_root_cert.pem" />
     <None Include="sdkconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main\howsmyssl_com_root_cert.pem" />
+    <ClInclude Include="main\http_client.h" />
+    <ClInclude Include="main\recorder.h" />
+    <ClInclude Include="main\wav.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

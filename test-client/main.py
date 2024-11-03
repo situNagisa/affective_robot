@@ -1,17 +1,16 @@
 import requests
 
-# 发送 POST 请求
-url = "http://119.91.44.126:9090/api/text/save"
-data = {
-    "id": 10086,
-    "content": "123123"
-}
+# 定义 API 端点
+url = 'http://134.175.177.58:9191/tem/upload-voice'
 
-response = requests.post(url, json="hello")  # 发送 JSON 数据
+# 定义要上传的音频文件路径
+file_path = '../xxx.wav'
 
-# 检查响应状态码
-if response.status_code == 200:
-    print("成功提交数据:")
-    print(response.json())  # 假设返回的是 JSON 格式
-else:
-    print("请求失败:", response.status_code)
+# 使用 multipart/form-data 上传文件
+with open(file_path, 'rb') as f:
+    files = {'file': ('audio.wav', f, 'audio/wav')}
+    response = requests.post(url, files=files)
+
+# 打印响应内容
+print(f'Status Code: {response.status_code}')
+print(f'Response: {response.text}')
