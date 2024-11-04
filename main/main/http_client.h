@@ -18,6 +18,9 @@ extern "C" {
 	esp_err_t http_client_send_wav_header(esp_http_client_handle_t client, ::wav_header const* header);
 	esp_err_t http_client_send_wav_data_stream(esp_http_client_handle_t client, uint8_t const* wav, size_t size);
 	esp_err_t http_client_end_send_wav(esp_http_client_handle_t client);
+
+	esp_http_client_handle_t http_client_start_receive_wav(char const* filename, int64_t* content_length);
+	size_t http_client_receive_wav(esp_http_client_handle_t client, uint8_t* buffer, size_t size);
 #ifdef __cplusplus
 }
 #endif

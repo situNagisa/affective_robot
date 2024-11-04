@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
+#include <cstdlib>
 #include <cinttypes>
 #include <bit>
 #include <new>
@@ -67,7 +68,7 @@ extern "C" esp_http_client_handle_t http_client_start_send_wav()
 	auto client = ::esp_http_client_init(&config);
 
 	::esp_http_client_set_method(client, HTTP_METHOD_POST);
-	::esp_http_client_set_header(client, "Content-Type", "audio/wav");
+	::esp_http_client_set_header(client, "Content-Type", "application/octet-stream");
 
 	return client;
 }
@@ -78,11 +79,6 @@ extern "C" esp_err_t http_client_send_wav_header(esp_http_client_handle_t client
 		ESP_LOGE(tag, "Failed to open HTTP connection: %s", esp_err_to_name(err));
 		return err;
 	}
-	/*if (::esp_http_client_write(client, ::std::ranges::data(boundary_start), ::std::ranges::size(boundary_start)) < 0)
-	{
-		ESP_LOGE(tag, "Write failed");
-		return ESP_FAIL;
-	}*/
 	auto result = ::esp_http_client_write(client, reinterpret_cast<const char*>(header), sizeof(::wav_header));
 	ESP_LOGI(tag, "write %d", result);
 
@@ -91,11 +87,6 @@ extern "C" esp_err_t http_client_send_wav_header(esp_http_client_handle_t client
 
 extern "C" esp_err_t http_client_send_wav_data_stream(esp_http_client_handle_t client, uint8_t const* wav, ::std::size_t size)
 {
-	/*if (::esp_http_client_write(client, ::std::ranges::data(boundary_start), ::std::ranges::size(boundary_start)) < 0)
-	{
-		ESP_LOGE(tag, "Write failed");
-		return ESP_FAIL;
-	}*/
 	auto result = ::esp_http_client_write(client, reinterpret_cast<const char*>(wav), size);
 	ESP_LOGI(tag, "write %d", result);
 	return ESP_OK;
@@ -103,11 +94,6 @@ extern "C" esp_err_t http_client_send_wav_data_stream(esp_http_client_handle_t c
 
 extern "C" esp_err_t http_client_end_send_wav(esp_http_client_handle_t client)
 {
-	/*if (::esp_http_client_write(client, ::std::ranges::data(boundary_end), ::std::ranges::size(boundary_end)) < 0)
-	{
-		ESP_LOGE(tag, "Write failed");
-		return ESP_FAIL;
-	}*/
 	if (::esp_http_client_fetch_headers(client) < 0)
 	{
 		ESP_LOGE(tag, "HTTP client fetch headers failed");
@@ -130,6 +116,53 @@ extern "C" esp_err_t http_client_end_send_wav(esp_http_client_handle_t client)
 	esp_http_client_cleanup(client);
 
 	return ESP_OK;
+}
+
+
+extern "C" esp_http_client_handle_t http_client_start_receive_wav(char const* filename, ::std::int64_t* content_length)
+{
+	auto&& base_url = "http://134.175.177.58:9191/tem/download-voice/";
+	char url[256]{};
+	if (::std::strlen(filename) > ::std::ranges::size(url) - ::std::ranges::size(base_url))
+	{
+		ESP_LOGE(tag, "Filename too long");
+		::std::abort();
+	}
+	::std::memcpy(url, base_url, ::std::ranges::size(base_url));
+	::std::strcat(url, filename);
+#if defined(__GNUC__) || defined(__clang__)
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
+	ESP_LOGI(tag, "url = %s", url);
+	esp_http_client_config_t config = {
+		.url = url,
+	};
+#if defined(__GNUC__) || defined(__clang__)
+#	pragma GCC diagnostic pop
+#endif
+	auto client = ::esp_http_client_init(&config);
+
+	::esp_http_client_set_method(client, HTTP_METHOD_GET);
+	::esp_http_client_set_header(client, "Content-Type", "audio/wav");
+
+	if (auto err = esp_http_client_open(client, 0); err != ESP_OK) {
+		ESP_LOGE(tag, "Failed to open HTTP connection: %s", esp_err_to_name(err));
+		::esp_http_client_close(client);
+		::esp_http_client_cleanup(client);
+		::std::abort();
+	}
+	*content_length = ::esp_http_client_fetch_headers(client);
+	return client;
+}
+
+extern "C" ::std::size_t http_client_receive_wav(esp_http_client_handle_t client, ::std::uint8_t* buffer, ::std::size_t size)
+{
+	auto data_read = ::esp_http_client_read_response(client, reinterpret_cast<char*>(buffer), size);
+	ESP_LOGI(tag, "HTTP POST status = %d", ::esp_http_client_get_status_code(client));
+	::esp_http_client_close(client);
+	::esp_http_client_cleanup(client);
+	return data_read;
 }
 
 extern "C" esp_err_t http_client_test()

@@ -81,6 +81,30 @@ extern "C" void app_main(void)
 	ESP_ERROR_CHECK(::recorder_initialize());
 
 	::send_wav(3);
+	{
+		::std::int64_t content_length;
+		auto client = ::http_client_start_receive_wav("6968be28-1bbc-4646-a194-af4f49f125d1.wav", &content_length);
+		if (content_length < 0)
+		{
+			ESP_LOGE("main", "Failed to start receive wav");
+			::esp_http_client_cleanup(client);
+			::std::abort();
+		}
+		ESP_LOGI("main", "content_length = %lld", content_length);
+		if (content_length > ::heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT))
+		{
+			ESP_LOGE("main", "Insufficient memory to receive wav");
+			::std::abort();
+		}
+		auto data = static_cast<::std::uint8_t*>(::heap_caps_malloc(content_length, MALLOC_CAP_8BIT));
+		if (data == nullptr)
+		{
+			ESP_LOGE("main", "Memory allocation failed!");
+			::std::abort();
+		}
+		auto data_size = ::http_client_receive_wav(client, data, content_length);
+		ESP_LOGI("main", "receive %u bytes", data_size);
+	}
 
 	while (true);
 
