@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="main\client.cpp" />
     <ClCompile Include="main\http_client.cpp" />
+    <ClCompile Include="main\key.cpp" />
     <ClCompile Include="main\main.cpp" />
-    <ClCompile Include="main\recorder.c" />
+    <ClCompile Include="main\play.cpp" />
     <ClCompile Include="main\recorder.cpp" />
     <ClCompile Include="main\wav.cpp" />
   </ItemGroup>
@@ -35,7 +37,11 @@
     <None Include="sdkconfig" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="main\client.h" />
     <ClInclude Include="main\http_client.h" />
+    <ClInclude Include="main\i2sconfig.h" />
+    <ClInclude Include="main\key.h" />
+    <ClInclude Include="main\play.h" />
     <ClInclude Include="main\recorder.h" />
     <ClInclude Include="main\wav.h" />
   </ItemGroup>

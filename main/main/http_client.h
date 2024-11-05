@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 	esp_err_t http_client_initialize();
+	esp_err_t http_client_deinitialize();
 	esp_err_t http_client_test();
 
 	esp_http_client_handle_t http_client_start_send_wav();

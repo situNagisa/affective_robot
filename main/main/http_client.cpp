@@ -53,6 +53,16 @@ extern "C" esp_err_t http_client_initialize()
 	return ESP_OK;
 }
 
+extern "C" esp_err_t http_client_deinitialize()
+{
+	(esp_netif_deinit());
+	(nvs_flash_deinit());
+	esp_event_loop_delete_default();
+	example_disconnect();
+
+	return ESP_OK;
+}
+
 extern "C" esp_http_client_handle_t http_client_start_send_wav()
 {
 #if defined(__GNUC__) || defined(__clang__)
@@ -159,7 +169,7 @@ extern "C" esp_http_client_handle_t http_client_start_receive_wav(char const* fi
 extern "C" ::std::size_t http_client_receive_wav(esp_http_client_handle_t client, ::std::uint8_t* buffer, ::std::size_t size)
 {
 	auto data_read = ::esp_http_client_read_response(client, reinterpret_cast<char*>(buffer), size);
-	ESP_LOGI(tag, "HTTP POST status = %d", ::esp_http_client_get_status_code(client));
+	ESP_LOGI(tag, "HTTP GET status = %d", ::esp_http_client_get_status_code(client));
 	::esp_http_client_close(client);
 	::esp_http_client_cleanup(client);
 	return data_read;
