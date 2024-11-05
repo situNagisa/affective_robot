@@ -23,14 +23,6 @@
 #include "./wav.h"
 
 inline static constexpr auto tag = "http client";
-#define BOUNDARY "boundary_tag"
-inline static constexpr auto&& boundary_start =
-	"--" BOUNDARY "\r\n"
-	R"(Content-Disposition: from-data; name=""; filename="")" "\r\n"
-	R"(Content-Type: audio/wav)" "\r\n"
-	"\r\n"
-	;
-inline static constexpr auto&& boundary_end = "\r\n--" BOUNDARY "--\r\n";
 
 extern "C" esp_err_t http_client_initialize()
 {
@@ -55,10 +47,10 @@ extern "C" esp_err_t http_client_initialize()
 
 extern "C" esp_err_t http_client_deinitialize()
 {
+	(example_disconnect());
+	(esp_event_loop_delete_default());
 	(esp_netif_deinit());
 	(nvs_flash_deinit());
-	esp_event_loop_delete_default();
-	example_disconnect();
 
 	return ESP_OK;
 }
@@ -102,7 +94,7 @@ extern "C" esp_err_t http_client_send_wav_data_stream(esp_http_client_handle_t c
 	return ESP_OK;
 }
 
-extern "C" esp_err_t http_client_end_send_wav(esp_http_client_handle_t client)
+extern "C" esp_err_t http_client_end_send_wav(esp_http_client_handle_t client, char* filename, ::std::size_t size)
 {
 	if (::esp_http_client_fetch_headers(client) < 0)
 	{
@@ -122,8 +114,32 @@ extern "C" esp_err_t http_client_end_send_wav(esp_http_client_handle_t client)
 		esp_http_client_get_content_length(client),
 		output_buffer
 	);
-	ESP_LOG_BUFFER_HEX(tag, output_buffer, data_read);
 	esp_http_client_cleanup(client);
+
+	{
+		constexpr auto keyword = ::std::string_view("uploaded successfully: ");
+		auto output_view = ::std::string_view(output_buffer, data_read);
+		auto pos = output_view.find(keyword);
+		if (pos == ::std::string_view::npos)
+		{
+			ESP_LOGE(tag, "Failed to find \"uploaded successfully: \"");
+		}
+		auto filename_view = output_view.substr(pos + keyword.size());
+		auto pos2 = filename_view.find('"');
+		if (pos2 == ::std::string_view::npos)
+		{
+			ESP_LOGE(tag, "Failed to find '\"'");
+		}
+		auto filename_view2 = filename_view.substr(0, pos2);
+		if (filename_view2.size() + 1 > size)
+		{
+			ESP_LOGE(tag, "Filename too long");
+			::std::abort();
+		}
+		::std::memcpy(filename, filename_view2.data(), filename_view2.size());
+		filename[filename_view2.size()] = '\0';
+		ESP_LOGI(tag, "filename = %s", filename);
+	}
 
 	return ESP_OK;
 }

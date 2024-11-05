@@ -12,11 +12,6 @@ void i2s_play(uint8_t const * wav_buffer, int wav_size) {
     // 播放 WAV 数据
     i2s_write(I2S_PORT_OUT, wav_buffer + WAV_HEADER_SIZE, wav_size - WAV_HEADER_SIZE, &bytes_written, portMAX_DELAY);
     ESP_LOGI(TAG, "Playback finished.");
-
-    vTaskDelay(3500 / portTICK_PERIOD_MS);
-    //i2s_driver_uninstall(I2S_PORT_OUT);
-    //free(wav_buffer);
-
 }
 
 // 初始化 I2S 输出

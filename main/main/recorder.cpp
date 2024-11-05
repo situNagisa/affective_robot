@@ -82,7 +82,7 @@ extern "C" ::std::size_t recorder_record(::std::uint8_t* data, ::std::size_t rec
 
 	while(size < requires_size)
 	{
-		ESP_LOGI("recorder", "record %u%%", size * 100 / requires_size);
+		ESP_LOGI("recorder", "size: %u (%u%%)", size, size * 100 / requires_size);
 		::std::size_t bytes_read;
 		::i2s_read(I2S_PORT, data + size, ::std::min<::std::size_t>(I2S_READ_LEN, requires_size - size), &bytes_read, portMAX_DELAY);
 		size += bytes_read;

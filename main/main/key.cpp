@@ -58,6 +58,7 @@ void button_task(void *arg) {
         if (xQueueReceive(button_event_queue, &event, portMAX_DELAY)) {
             if (event == BUTTON_PRESS) {
                 client_send_wav();
+                client_receive_wav();
             } 
             // 去抖延迟
             vTaskDelay(DEBOUNCE_TIME / portTICK_PERIOD_MS);

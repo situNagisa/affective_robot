@@ -30,23 +30,14 @@ extern "C" void app_main(void)
 	ESP_ERROR_CHECK(::http_client_initialize());
 	ESP_ERROR_CHECK(::recorder_initialize());
 	ESP_ERROR_CHECK(::client_initialize());
-
-	client_send_wav();
-
-	http_client_deinitialize();
-
-	::vTaskDelay(3 / portTICK_PERIOD_MS);
-
-	client_print_wav();
-
-	return;
-
-	button_init();
 	i2sInitOutput();
+	
+	button_init();
 	//::xTaskCreate(button_task, "button_task", 4 * 1024, NULL, 10, NULL);
 	button_task(nullptr);
 	
 	while (true);
 
 	::client_deinitialize();
+	::http_client_deinitialize();
 }
