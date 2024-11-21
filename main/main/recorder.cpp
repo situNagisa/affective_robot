@@ -64,7 +64,7 @@ extern "C" ::wav_header recorder_wav_header(::std::size_t data_size)
 {
 	return ::wav_header_construct(
 		data_size + sizeof(::wav_header) - sizeof(::wav_header::riff) - sizeof(::wav_header::file_size),
-		10,
+		16,
 		1,
 		I2S_CHANNEL_NUM,
 		I2S_SAMPLE_RATE,

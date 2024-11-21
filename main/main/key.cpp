@@ -50,6 +50,8 @@ void button_init() {
     gpio_isr_handler_add(BUTTON_GPIO_PIN, button_isr_handler, NULL);
 }
 
+
+
 // 按键处理任务
 void button_task(void *arg) {
     button_event_t event;
@@ -58,6 +60,7 @@ void button_task(void *arg) {
         if (xQueueReceive(button_event_queue, &event, portMAX_DELAY)) {
             if (event == BUTTON_PRESS) {
                 client_send_wav();
+                vTaskDelay(5000 / portTICK_PERIOD_MS);
                 client_receive_wav();
             } 
             // 去抖延迟

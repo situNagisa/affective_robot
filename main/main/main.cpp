@@ -26,7 +26,7 @@
 extern "C" void app_main(void)
 {
 	ESP_ERROR_CHECK(::esp_task_wdt_deinit());
-
+	
 	ESP_ERROR_CHECK(::http_client_initialize());
 	ESP_ERROR_CHECK(::recorder_initialize());
 	ESP_ERROR_CHECK(::client_initialize());

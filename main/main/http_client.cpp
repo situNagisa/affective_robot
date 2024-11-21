@@ -13,7 +13,7 @@
 #include <new>
 #include <ranges>
 #include <string_view>
-
+#include <cstdio>
 #include <esp_http_client.h>
 #include <esp_timer.h>
 
@@ -23,9 +23,13 @@
 #include "./wav.h"
 
 inline static constexpr auto tag = "http client";
+#define HTTP_CLIENT_URL "http://43.139.84.179:5001"
+
 
 extern "C" esp_err_t http_client_initialize()
 {
+	::std::printf("http client url is:" HTTP_CLIENT_URL);
+
 	esp_err_t ret = nvs_flash_init();
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_ERROR_CHECK(nvs_flash_erase());
@@ -62,7 +66,7 @@ extern "C" esp_http_client_handle_t http_client_start_send_wav()
 #	pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
 	esp_http_client_config_t config = {
-		.url = "http://134.175.177.58:9191/tem/upload-voice",
+		.url = HTTP_CLIENT_URL "/tem/upload-voice",
 	};
 #if defined(__GNUC__) || defined(__clang__)
 #	pragma GCC diagnostic pop
@@ -96,11 +100,16 @@ extern "C" esp_err_t http_client_send_wav_data_stream(esp_http_client_handle_t c
 
 extern "C" esp_err_t http_client_end_send_wav(esp_http_client_handle_t client, char* filename, ::std::size_t size)
 {
-	if (::esp_http_client_fetch_headers(client) < 0)
+	auto ret = ::esp_http_client_fetch_headers(client);
+	while(ret < 0)
 	{
-		ESP_LOGE(tag, "HTTP client fetch headers failed");
-		::esp_http_client_cleanup(client);
-		return ESP_FAIL;
+		if (ret == -1)
+		{
+			ESP_LOGW(tag, "HTTP client fetch headers failed");
+			::esp_http_client_cleanup(client);
+			return ESP_FAIL;
+		}
+		ret = ::esp_http_client_fetch_headers(client);
 	}
 	char output_buffer[256]{};
 	auto data_read = esp_http_client_read_response(client, output_buffer, ::std::ranges::size(output_buffer));
@@ -147,7 +156,7 @@ extern "C" esp_err_t http_client_end_send_wav(esp_http_client_handle_t client, c
 
 extern "C" esp_http_client_handle_t http_client_start_receive_wav(char const* filename, ::std::int64_t* content_length)
 {
-	auto&& base_url = "http://134.175.177.58:9191/tem/download-voice/";
+	auto&& base_url = HTTP_CLIENT_URL "/tem/download-voice/";
 	char url[256]{};
 	if (::std::strlen(filename) > ::std::ranges::size(url) - ::std::ranges::size(base_url))
 	{

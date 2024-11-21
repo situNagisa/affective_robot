@@ -27,6 +27,7 @@ wav_header
 	uint_least8_t riff[4];
 	uint_least32_t file_size;
 	uint_least8_t wave[4];
+
 	uint_least8_t format[4];
 	uint_least32_t format_size;
 	uint_least16_t audio_format;
@@ -35,6 +36,7 @@ wav_header
 	uint_least32_t byte_rate;
 	uint_least16_t block_align;
 	uint_least16_t bits_per_sample;
+
 	uint_least8_t data[4];
 	uint_least32_t data_size;
 };
